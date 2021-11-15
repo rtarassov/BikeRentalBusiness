@@ -1,3 +1,4 @@
+
 import menu.Menu;
 import menu.MenuItem;
 import menu.MenuManager;
@@ -81,6 +82,9 @@ public class MainManager {
         manager.addItemToMenu(bikesMenu, new MenuItem("4", "Update bike info", MainManager::updateBike));
         manager.addMenu(bikesMenu, mainMenu);
 
+        Menu clientsMenu = new Menu(properties.getProperty("clientsMenu"));
+//        manager.addItemToMenu(clientsMenu, new MenuItem("1", "Add clients", ));
+
         Menu fundsMenu = new Menu(properties.getProperty("fundsMenu"));
         manager.addItemToMenu(fundsMenu, new MenuItem("1", "Display cash in register", MainManager::cashInRegister));
         manager.addItemToMenu(fundsMenu, new MenuItem("2", "Display free cash", MainManager::cash));
@@ -95,14 +99,14 @@ public class MainManager {
 
     }
 
-    private static String addBike() {
+    public static String addBike() {
         // add new bike
         System.out.println(properties.getProperty("bikesMenu"));
         for (var bikeType : BikeType.values()) {
             System.out.print(bikeType.getValue() + " / ");
         }
-            System.out.println();
-            String bikeType;
+        System.out.println();
+        String bikeType;
         do {
             System.out.print("What type of bike are you adding?: ");
             bikeType = scanner.nextLine();
@@ -132,7 +136,7 @@ public class MainManager {
         return properties.getProperty("bikesMenu");
     }
 
-    private static String removeBike() {
+    public static String removeBike() {
         System.out.println("Whats the bike ID you want to remove?: ");
         int id = scanner.nextInt();
 
@@ -147,7 +151,7 @@ public class MainManager {
         return properties.getProperty("bikesMenu");
     }
 
-    private static String updateBike() {
+    public static String updateBike() {
         System.out.println("Whats the bike ID you want to update?: ");
         int id = scanner.nextInt();
         scanner.nextLine();
@@ -164,23 +168,23 @@ public class MainManager {
         String updateOption = scanner.nextLine();
 
         switch (updateOption.toUpperCase()) {
-            case "TYPE" -> {
+            case "TYPE": {
                 System.out.println("Enter new bike type");
                 System.out.println("/ DIRT BIKE / KIDS BIKE / ROAD BIKE /");
                 String newType = scanner.nextLine();
                 bikeToUpdate.setBikeType(BikeType.fromString(newType));
             }
-            case "MANUFACTURER" -> {
+            case "MANUFACTURER": {
                 System.out.print("Enter new manufacturer: ");
                 String newManufacturer = scanner.nextLine();
                 bikeToUpdate.setManufacturer(newManufacturer);
             }
-            case "MODEL" -> {
+            case "MODEL": {
                 System.out.print("Enter new model: ");
                 String newModel = scanner.nextLine();
                 bikeToUpdate.setModel(newModel);
             }
-            case "COLOR" -> {
+            case "COLOR": {
                 System.out.print("Enter new color: ");
                 String newColor = scanner.nextLine();
                 bikeToUpdate.setColor(newColor);
@@ -196,7 +200,7 @@ public class MainManager {
         return properties.getProperty("bikesMenu");
     }
 
-    private static String listBikes() {
+    public static String listBikes() {
         bikeRepository.listBikes();
         return properties.getProperty("bikesMenu");
     }
