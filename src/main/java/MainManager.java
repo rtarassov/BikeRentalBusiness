@@ -4,18 +4,24 @@ import menu.MenuItem;
 import menu.MenuManager;
 import model.Bike;
 import model.BikeType;
+import model.Client;
 import repositories.BikeRepository;
+import repositories.ClientRepository;
 import util.CustomException;
 import util.ExceptionMessage;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class MainManager {
     static Scanner scanner = new Scanner(System.in);
     static BikeRepository bikeRepository = new BikeRepository();
+    static ClientRepository clientRepository = new ClientRepository();
     static MenuManager menuManager = new MenuManager();
     static Properties properties = new Properties();
 
@@ -70,9 +76,10 @@ public class MainManager {
     private static void createMenus(MenuManager manager) {
         Menu mainMenu = new Menu(properties.getProperty("mainMenu"));
         manager.addItemToMenu(mainMenu, new MenuItem("x", "Exit program", () -> null));
-        manager.addItemToMenu(mainMenu, new MenuItem("1", "Manage items", () -> "### Bikes ###"));
-        manager.addItemToMenu(mainMenu, new MenuItem("2", "Funds", () -> " ### Funds ###"));
-        manager.addItemToMenu(mainMenu, new MenuItem("3", "Discounts", () -> "### Discounts ###"));
+        manager.addItemToMenu(mainMenu, new MenuItem("1", "Manage bikes", () -> properties.getProperty("bikesMenu")));
+        manager.addItemToMenu(mainMenu, new MenuItem("2", "Manage clients", () -> properties.getProperty("clientsMenu")));
+        manager.addItemToMenu(mainMenu, new MenuItem("3", "Funds", () -> properties.getProperty("fundsMenu")));
+        manager.addItemToMenu(mainMenu, new MenuItem("4", "Discounts", () -> properties.getProperty("discountsMenu")));
         manager.addMenu(mainMenu, null);
 
         Menu bikesMenu = new Menu(properties.getProperty("bikesMenu"));
@@ -83,7 +90,10 @@ public class MainManager {
         manager.addMenu(bikesMenu, mainMenu);
 
         Menu clientsMenu = new Menu(properties.getProperty("clientsMenu"));
-//        manager.addItemToMenu(clientsMenu, new MenuItem("1", "Add clients", ));
+        manager.addItemToMenu(clientsMenu, new MenuItem("1", "Add clients", MainManager::addClient));
+        manager.addItemToMenu(clientsMenu, new MenuItem("2", "Remove clients", MainManager::removeClient));
+        manager.addItemToMenu(clientsMenu, new MenuItem("3", "List all clients", MainManager::listClients));
+        manager.addMenu(clientsMenu, mainMenu);
 
         Menu fundsMenu = new Menu(properties.getProperty("fundsMenu"));
         manager.addItemToMenu(fundsMenu, new MenuItem("1", "Display cash in register", MainManager::cashInRegister));
@@ -136,6 +146,43 @@ public class MainManager {
         return properties.getProperty("bikesMenu");
     }
 
+    public static String addClient() {
+
+        System.out.print("Whats the client name?: ");
+        String name = scanner.nextLine();
+        System.out.println("Date of birth format: [ DD-MM-YYYY ]");
+        System.out.print("Whats the client date of birth?: ");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String date = scanner.nextLine();
+        Date dateOfBirth = null;
+        try {
+            dateOfBirth = simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        System.out.print("Whats the client email?: ");
+        String email = scanner.nextLine();
+        System.out.print("Whats the client ID?: ");
+        int id = scanner.nextInt();
+//        int retryId;
+        Client client = new Client(name, dateOfBirth, email, id);
+            try {
+                clientRepository.addClient(client);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                return properties.getProperty("clientsMenu");
+//                do {
+//                System.out.println(e.getMessage());
+//                System.out.print("Whats the client ID?: ");
+//                retryId = scanner.nextInt();
+//                Client reTryClient = new Client(name, dateOfBirth, email, retryId);
+//            } while (retryId == clientRepository.findClientById(retryId).getId());
+        }
+        System.out.println("Successfully added");
+
+        return properties.getProperty("clientsMenu");
+    }
+
     public static String removeBike() {
         System.out.println("Whats the bike ID you want to remove?: ");
         int id = scanner.nextInt();
@@ -149,6 +196,21 @@ public class MainManager {
         System.out.println("Successfully removed");
         System.out.println();
         return properties.getProperty("bikesMenu");
+    }
+
+    public static String removeClient() {
+        System.out.println("Whats the client ID you want to remove?: ");
+        int id = scanner.nextInt();
+
+        try {
+            clientRepository.removeClient(id);
+        } catch (CustomException e) {
+            e.printStackTrace();
+            return properties.getProperty("clientsMenu");
+        }
+        System.out.println("Successfully removed");
+        System.out.println();
+        return properties.getProperty("clientsMenu");
     }
 
     public static String updateBike() {
@@ -203,6 +265,11 @@ public class MainManager {
     public static String listBikes() {
         bikeRepository.listBikes();
         return properties.getProperty("bikesMenu");
+    }
+
+    public static String listClients() {
+        clientRepository.listClients();
+        return properties.getProperty("clientsMenu");
     }
 
     private static String cashInRegister() {

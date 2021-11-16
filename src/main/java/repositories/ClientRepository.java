@@ -19,7 +19,7 @@ public class ClientRepository {
     }
 
     public void removeClient(int id) throws CustomException {
-        if (clients.stream().anyMatch(clientId -> clientId.getId() == clientId.getId())) {
+        if (clients.stream().anyMatch(clientId -> clientId.getId() == id)) {
             throw new CustomException(ExceptionMessage.NO_SUCH_CLIENT_WITH_ID);
         }
         clients = clients.stream()

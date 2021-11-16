@@ -16,4 +16,11 @@ public class Client {
     private String email;
     private int id;
     private List<Bike> rentals;
+
+    public Client(String name, Date dateOfBirth, String email, int id) {
+        this.name = name;
+        this.dateOfBirth = dateOfBirth;
+        this.email = email;
+        this.id = id;
+    }
 }
