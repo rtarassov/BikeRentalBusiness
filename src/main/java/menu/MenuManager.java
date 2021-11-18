@@ -39,7 +39,7 @@ public class MenuManager {
                 return menu;
             }
         }
-        throw new IllegalArgumentException("No such menu with heading: " + heading);
+        return null;
     }
 
     public void setCurrentMenu(Menu currentMenu) {

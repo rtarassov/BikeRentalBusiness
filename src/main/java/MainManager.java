@@ -14,7 +14,6 @@ import util.ExceptionMessage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -32,14 +31,12 @@ public class MainManager {
         runMain();
     }
 
-    public static Properties loadProperties(Properties properties) throws CustomException {
+    public static void loadProperties(Properties properties) throws CustomException {
         try {
             properties.load(new FileInputStream(new File(".").getCanonicalFile() + "/application.properties"));
         } catch (IOException e) {
             throw new CustomException(ExceptionMessage.ERROR_LOADING_PROPERTIES);
         }
-
-        return properties;
     }
 
     public static void runMain() {
@@ -52,14 +49,17 @@ public class MainManager {
         String input;
         createMenus(menuManager);
         menuManager.setCurrentMenu(menuManager.getMenuByHeading(properties.getProperty("mainMenu")));
-        do {
+        while (true) {
             menuManager.getCurrentMenu().printMenu();
             input = scanner.nextLine();
             System.out.println();
+            Menu nextMenu = null;
+            boolean choseOption = false;
 
             for (MenuItem item : menuManager.getCurrentMenu().getMenuItems()) {
                 if (item.getOption().equalsIgnoreCase(input)) {
-                    Menu nextMenu = menuManager.getMenuByHeading(item.getCodeToRun().runCode());
+                    choseOption = true;
+                    nextMenu = menuManager.getMenuByHeading(item.getCodeToRun().runCode());
                     if (nextMenu == null) {
                         break;
                     }
@@ -70,8 +70,13 @@ public class MainManager {
                     }
                 }
             }
-
-        } while (!input.equalsIgnoreCase("X"));
+            if (!choseOption) {
+                continue;
+            }
+            if (nextMenu == null) {
+                break;
+            }
+        }
     }
 
     private static void createMenus(MenuManager manager) {
@@ -110,43 +115,6 @@ public class MainManager {
 
     }
 
-    public static String addBike() {
-        // add new bike
-        System.out.println(properties.getProperty("bikesMenu"));
-        for (var bikeType : BikeType.values()) {
-            System.out.print(bikeType.getValue() + " / ");
-        }
-        System.out.println();
-        String bikeType;
-        do {
-            System.out.print("What type of bike are you adding?: ");
-            bikeType = scanner.nextLine();
-
-        } while (BikeType.fromString(bikeType) == null);
-
-        System.out.print("Who is the manufacturer?: ");
-        String manufacturer = scanner.nextLine();
-        System.out.print("Whats the bike model?: ");
-        String model = scanner.nextLine();
-        System.out.print("Whats the color?: ");
-        String color = scanner.nextLine();
-        System.out.print("Whats the bike ID?: ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
-        Bike bike = new Bike(BikeType.fromString(bikeType), manufacturer, model, color, id);
-        try {
-            bikeRepository.addBike(bike);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return properties.getProperty("bikesMenu");
-        }
-
-        System.out.println("Successfully added");
-        System.out.println();
-        // Go to main menu
-        return properties.getProperty("bikesMenu");
-    }
-
     public static String addClient() {
 
         System.out.print("Whats the client name?: ");
@@ -159,27 +127,33 @@ public class MainManager {
         try {
             dateOfBirth = simpleDateFormat.parse(date);
         } catch (ParseException e) {
+            // TODO: Better error for client
             e.printStackTrace();
         }
         System.out.print("Whats the client email?: ");
         String email = scanner.nextLine();
         System.out.print("Whats the client ID?: ");
         int id = scanner.nextInt();
-//        int retryId;
-        Client client = new Client(name, dateOfBirth, email, id);
+        scanner.nextLine();
+
+        Client client;
+        do {
+
             try {
-                clientRepository.addClient(client);
-            } catch (Exception e) {
+                clientRepository.addClient(new Client(name, dateOfBirth, email, id));
+                client = null;
+            } catch (CustomException e) {
                 System.out.println(e.getMessage());
-                return properties.getProperty("clientsMenu");
-//                do {
-//                System.out.println(e.getMessage());
-//                System.out.print("Whats the client ID?: ");
-//                retryId = scanner.nextInt();
-//                Client reTryClient = new Client(name, dateOfBirth, email, retryId);
-//            } while (retryId == clientRepository.findClientById(retryId).getId());
-        }
+                System.out.print("Whats the client ID?: ");
+                id = scanner.nextInt();
+                scanner.nextLine();
+                client = new Client(name, dateOfBirth, email, id);
+            }
+
+        } while (client != null);
+
         System.out.println("Successfully added");
+        System.out.println();
 
         return properties.getProperty("clientsMenu");
     }
@@ -218,7 +192,7 @@ public class MainManager {
         System.out.println("Whats the bike ID you want to update?: ");
         int id = scanner.nextInt();
         scanner.nextLine();
-        Bike bikeToUpdate = null;
+        Bike bikeToUpdate;
         try {
             bikeToUpdate = bikeRepository.findBikeById(id);
         } catch (CustomException e) {

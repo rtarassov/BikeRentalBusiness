@@ -32,7 +32,7 @@ public class ClientRepository {
         addClient(client);
     }
 
-    public Client findClientById(int id) throws CustomException {
+    public Client findClientById(Integer id) throws CustomException {
         return clients
                 .stream()
                 .filter(client -> client.getId() == id)
