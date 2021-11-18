@@ -2,6 +2,7 @@
 import menu.Menu;
 import menu.MenuItem;
 import menu.MenuManager;
+import menu_category.BikeMenu;
 import model.Bike;
 import model.BikeType;
 import model.Client;
@@ -83,7 +84,7 @@ public class MainManager {
         manager.addMenu(mainMenu, null);
 
         Menu bikesMenu = new Menu(properties.getProperty("bikesMenu"));
-        manager.addItemToMenu(bikesMenu, new MenuItem("1", "Add bikes", MainManager::addBike));
+        manager.addItemToMenu(bikesMenu, new MenuItem("1", "Add bikes", () -> BikeMenu.addBike(properties, bikeRepository)));
         manager.addItemToMenu(bikesMenu, new MenuItem("2", "Remove bikes", MainManager::removeBike));
         manager.addItemToMenu(bikesMenu, new MenuItem("3", "List all bikes", MainManager::listBikes));
         manager.addItemToMenu(bikesMenu, new MenuItem("4", "Update bike info", MainManager::updateBike));
